@@ -1,5 +1,13 @@
-SELECT a.user_id, round(ifnull(avg(action = 'confirmed'), 0),2) as confirmation_rate
-FROM Signups a
-LEFT JOIN Confirmations b
-ON a.user_id = b.user_id
-GROUP BY a.user_id
+WITH CTE AS (
+    SELECT 
+        s.user_id, 
+        COUNT(*) AS Total, 
+        SUM(IF(c.action = 'confirmed', 1, 0)) AS ConfirmedAmount
+    FROM Signups s 
+    LEFT JOIN Confirmations c ON s.user_id = c.user_id
+    GROUP BY s.user_id
+)
+SELECT 
+    c.user_id,
+    ROUND(c.ConfirmedAmount / c.Total, 2) AS Confirmation_Rate
+FROM CTE AS c;
